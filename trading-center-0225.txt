@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light House 3.0 - Trading Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-base: #0a0a0a;
+            --bg-panel: #161616;
+            --bg-panel-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #8b8b8b;
+            --accent-green: #2ecc71;
+            --accent-green-hover: #27ae60;
+            --footer-purple: #4f3be8;
+            --border-color: #2a2a2a;
+            --lux-color: #f39c12; 
+            --danger-red: #e74c3c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* ================= Header Navigation ================= */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--border-color); }
+        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--accent-green); }
+        .nav-group-container { display: flex; gap: 30px; align-items: center; }
+        .nav-group { display: flex; gap: 10px; align-items: center; padding: 4px; background: rgba(255,255,255,0.03); border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); }
+        .nav-group-title { font-size: 12px; color: #e0e0e0; text-transform: uppercase; letter-spacing: 1px; margin: 0 10px; font-weight: 600; }
+        .nav-pill { padding: 8px 16px; border-radius: 20px; color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+        .nav-pill:hover { color: var(--text-primary); }
+        .nav-pill.active { background-color: #ffffff; color: #000000; font-weight: 500; }
+        
+        .avatar-container { border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .user-avatar-small { width: 32px; height: 32px; cursor: pointer; }
+
+        /* ================= Main Content & Dashboard ================= */
+        main { flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 40px 20px; }
+        h1 { font-size: 28px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        h1 i { color: var(--accent-green); }
+        .dashboard-panel { background-color: var(--bg-panel); border-radius: 24px; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border: 1px solid var(--border-color); }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar-large { width: 50px; height: 50px; }
+        .user-details h2 { font-size: 18px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .user-details h2 i { color: #3498db; font-size: 14px; }
+        .user-details p { color: var(--text-secondary); font-size: 14px; }
+        .user-stats { display: flex; gap: 40px; align-items: center; }
+        .stat-item { display: flex; align-items: center; gap: 10px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--text-primary); }
+        .stat-label { color: var(--text-secondary); font-size: 14px; }
+        .btn-withdraw { background: var(--text-primary); color: #000; border: none; padding: 8px 24px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        .btn-withdraw:hover { opacity: 0.9; }
+
+        /* ================= Trading Board & Grid ================= */
+        .trading-board { background-color: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
+        .list-header { display: grid; grid-template-columns: 2.2fr 2.2fr 1.5fr 1.3fr 1.6fr 1.1fr; padding: 20px 24px; color: var(--text-secondary); font-size: 14px; background-color: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color); }
+
+        /* ================= Accordion Interaction Styles ================= */
+        .accordion-wrapper { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+        .accordion-wrapper:hover { background-color: var(--bg-panel-hover); }
+        .accordion-wrapper.active { background-color: var(--bg-panel-hover); }
+        
+        .task-row-visible { display: grid; grid-template-columns: 2.2fr 2.2fr 1.5fr 1.3fr 1.6fr 1.1fr; padding: 20px 24px; align-items: center; cursor: pointer; }
+        
+        .project-col { display: flex; align-items: center; gap: 12px; }
+        .project-avatar { width: 36px; height: 36px; }
+        .project-info h3 { font-size: 14px; font-weight: 500; }
+        .project-info p { font-size: 12px; color: var(--text-secondary); }
+        
+        /* 进度条 */
+        .pool-col { display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 180px; }
+        .pool-text { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: var(--text-secondary); }
+        .pool-text strong { color: var(--text-primary); font-family: monospace; font-size: 13px; }
+        .pool-bar-bg { width: 100%; height: 6px; background: #2a2a2a; border-radius: 4px; overflow: hidden; }
+        .pool-bar-fill { height: 100%; background: var(--accent-green); border-radius: 4px; transition: width 0.4s ease; }
+        .pool-bar-fill.danger { background: var(--danger-red); }
+
+        .action-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { background-color: #2a2a2a; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+        
+        .price-col { font-weight: bold; color: var(--text-primary); white-space: nowrap; }
+        .price-col i { color: var(--lux-color); font-size: 12px; margin-right: 4px; }
+        
+        .est-col { font-weight: bold; color: var(--accent-green); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .est-col span { font-size: 11px; color: var(--text-secondary); font-weight: normal; }
+
+        .btn-toggle { background-color: var(--accent-green); color: #000; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; width: 100%; max-width: 120px; margin-left: auto; }
+        .btn-toggle:hover { background-color: var(--accent-green-hover); }
+        .btn-toggle i { transition: transform 0.3s ease; }
+        .accordion-wrapper.active .btn-toggle { background-color: #2a2a2a; color: white; }
+        .accordion-wrapper.active .btn-toggle i { transform: rotate(180deg); color: var(--accent-green); }
+
+        /* 下拉面板区域 */
+        .accordion-body { max-height: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); background: #0a0a0a; padding: 0 24px; box-sizing: border-box; }
+        .accordion-wrapper.active .accordion-body { max-height: 350px; padding: 24px; border-top: 1px dashed var(--border-color); }
+        
+        .body-content { display: flex; gap: 30px; opacity: 0; transition: opacity 0.3s ease 0.1s; }
+        .accordion-wrapper.active .body-content { opacity: 1; }
+
+        .preview-box { flex: 1.5; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 16px; position: relative; }
+        .preview-box::before { content: "\f099"; font-family: "Font Awesome 6 Brands"; position: absolute; top: 16px; right: 16px; color: #1da1f2; font-size: 18px; opacity: 0.5; }
+        .tweet-author { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .tweet-author img { width: 32px; height: 32px; border-radius: 50%; }
+        .tweet-author .name-block { display: flex; flex-direction: column; }
+        .tweet-author .name-block strong { font-size: 13px; color: #e0e0e0; }
+        .tweet-author .name-block span { font-size: 11px; color: var(--text-secondary); }
+        .tweet-text { font-size: 13px; color: #b0b0b0; line-height: 1.5; margin-bottom: 12px; }
+        .tweet-stats { display: flex; gap: 15px; font-size: 12px; color: var(--text-secondary); }
+
+        .action-steps { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 15px; border-left: 1px solid var(--border-color); padding-left: 30px; }
+        .step-text { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+        
+        .btn-x-link { background: #ffffff; color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; text-decoration: none; transition: opacity 0.2s; position: relative; z-index: 10;}
+        .btn-x-link:hover { opacity: 0.9; }
+        
+        /* 验证按钮样式 */
+        .btn-verify { background: var(--bg-panel); color: var(--accent-green); border: 1px solid var(--accent-green); padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; transition: all 0.3s; position: relative; width: 100%; opacity: 0.4; cursor: not-allowed; border-color: #444; color: #888; z-index: 10; }
+        .btn-verify.active-step { opacity: 1; cursor: pointer; border-color: var(--accent-green); color: var(--accent-green); }
+        .btn-verify.active-step:hover { background: rgba(46, 204, 113, 0.1); }
+        
+        /* 验证动作期间的 Loading 圈 */
+        .btn-verify.loading { background: transparent; border-color: transparent; color: transparent; pointer-events: none; }
+        .btn-verify.loading::after { content: ""; position: absolute; width: 18px; height: 18px; border: 2px solid var(--text-secondary); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 0.8s linear infinite; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .btn-verify.success { background: rgba(46, 204, 113, 0.1); border-color: transparent; color: var(--accent-green); pointer-events: none; opacity: 1; }
+        
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* ================= 融合的微交互动效 CSS ================= */
+        
+        /* 1. LUX 金币飘升动画 */
+        .lux-coin { position: absolute; color: var(--lux-color); font-size: 18px; animation: floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; z-index: 9999; opacity: 0; pointer-events: none; text-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
+        @keyframes floatUp { 0% { transform: translateY(10px) scale(0.5); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-80px) scale(1.2); opacity: 0; } }
+
+        /* 2. 科技绿色涟漪扩散 */
+        .ripple { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 30px; border: 2px solid var(--accent-green); box-shadow: 0 0 20px var(--accent-green); animation: rippleEffect 0.8s ease-out forwards; pointer-events: none; z-index: 9; }
+        @keyframes rippleEffect { 0% { width: 100%; height: 100%; opacity: 1; } 100% { width: 150%; height: 250%; opacity: 0; border-width: 0px; } }
+
+        /* ================= Footer ================= */
+        footer { background-color: var(--footer-purple); padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .footer-socials { display: flex; gap: 20px; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><i class="fa-solid fa-asterisk"></i> Light House</div>
+        <div class="nav-group-container">
+            <div class="nav-group">
+                <span class="nav-group-title">Account Lab</span>
+                <a href="#" class="nav-pill"><i class="fa-solid fa-pen-nib"></i> AI Pen</a>
+                <a href="#" class="nav-pill"><i class="fa-regular fa-newspaper"></i> Headlines</a>
+            </div>
+            <div class="nav-group">
+                <span class="nav-group-title">Traffic Exchange</span>
+                <a href="#" class="nav-pill active"><i class="fa-solid fa-store"></i> Trading Center</a>
+                <a href="#" class="nav-pill"><i class="fa-solid fa-briefcase"></i> Brand Orders</a>
+                <a href="#" class="nav-pill"><i class="fa-solid fa-satellite-dish"></i> Radar</a>
+            </div>
+        </div>
+        <div class="avatar-container user-avatar-small">
+            <img src="https://pbs.twimg.com/profile_images/1932237760435478528/7Qtx48xK_400x400.jpg" alt="User">
+        </div>
+    </header>
+
+    <main>
+        <h1><i class="fa-solid fa-store"></i> TRADING CENTER</h1>
+
+        <div class="dashboard-panel">
+            <div class="user-info">
+                <div class="avatar-container avatar-large">
+                    <img src="https://pbs.twimg.com/profile_images/1932237760435478528/7Qtx48xK_400x400.jpg" alt="User">
+                </div>
+                <div class="user-details">
+                    <h2>0xAllen <i class="fa-solid fa-circle-check"></i></h2>
+                    <p>@0xAllen • Reputation: High • Tier: L4</p>
+                </div>
+            </div>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Assets Sold</div>
+                </div>
+                <div class="stat-item" style="background: #2a2a2a; padding: 10px 20px; border-radius: 20px;">
+                    Wallet Balance 
+                    <span style="color: var(--lux-color); font-size: 18px; font-weight: bold; margin-left: 10px;">
+                        <i class="fa-regular fa-sun"></i> 250.3 LUX
+                    </span>
+                </div>
+                <button class="btn-withdraw">Withdraw</button>
+            </div>
+        </div>
+
+        <div class="trading-board">
+            <div class="list-header">
+                <div>Buyer Profile</div>
+                <div>Remaining Pool</div>
+                <div>Asset Type</div>
+                <div>Market Cap (Max)</div>
+                <div>Your Est. Income</div>
+                <div style="text-align: right; padding-right: 15px;">Action</div>
+            </div>
+
+            <div class="accordion-wrapper" id="taskRow1">
+                <div class="task-row-visible" onclick="toggleAccordion('taskRow1')">
+                    <div class="project-col">
+                        <div class="avatar-container project-avatar">
+                            <img src="https://pbs.twimg.com/profile_images/2018602511125618688/U1DIQSLA_400x400.jpg" alt="Buyer 1">
+                        </div>
+                        <div class="project-info">
+                            <h3>Web3Growth</h3>
+                            <p>@web3_guru</p>
+                        </div>
+                    </div>
+                    <div class="pool-col">
+                        <div class="pool-text">
+                            <span><i class="fa-regular fa-sun" style="color:var(--lux-color)"></i> LUX Left</span>
+                            <strong>750 / 1000</strong>
+                        </div>
+                        <div class="pool-bar-bg">
+                            <div class="pool-bar-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="action-tags">
+                        <span class="tag"><i class="fa-solid fa-user-plus"></i> Follow</span>
+                    </div>
+                    <div class="price-col"><i class="fa-regular fa-sun"></i> 1.00 LUX</div>
+                    <div class="est-col"><i class="fa-regular fa-sun"></i> 0.80 LUX <span>(Tier 4: 0.8)</span></div>
+                    <div>
+                        <button class="btn-toggle">Sell Asset <i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+                <div class="accordion-body">
+                    <div class="body-content">
+                        <div class="preview-box">
+                            <div class="tweet-author">
+                                <img src="https://pbs.twimg.com/profile_images/2018602511125618688/U1DIQSLA_400x400.jpg" alt="Author">
+                                <div class="name-block">
+                                    <strong>Web3Growth <i class="fa-solid fa-circle-check" style="color:#1da1f2"></i></strong>
+                                    <span>@web3_guru</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                The leading ecosystem builder in Web3. Supporting founders, protocols, and communities to scale. Join our journey to 1 Billion users. 🌐🚀
+                            </div>
+                            <div class="tweet-stats">
+                                <span><strong>125.4K</strong> Followers</span>
+                            </div>
+                        </div>
+                        <div class="action-steps">
+                            <div>
+                                <span class="step-text">Step 1: Execute on Platform</span>
+                                <a href="#" class="btn-x-link" onclick="markExecuted(event, 'verifyBtn1')"><i class="fa-brands fa-x-twitter"></i> Open in X to Follow</a>
+                            </div>
+                            <div>
+                                <span class="step-text">Step 2: Claim Reward</span>
+                                <button class="btn-verify" id="verifyBtn1" onclick="verifyTask(event, this, 'taskRow1', 0.80)">
+                                    <i class="fa-solid fa-shield-halved"></i> Verify & Claim LUX
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-wrapper" id="taskRow2">
+                <div class="task-row-visible" onclick="toggleAccordion('taskRow2')">
+                    <div class="project-col">
+                        <div class="avatar-container project-avatar">
+                            <img src="https://pbs.twimg.com/profile_images/1874785526903140352/-0niYltv_400x400.jpg" alt="Buyer 2">
+                        </div>
+                        <div class="project-info">
+                            <h3>CryptoAlpha</h3>
+                            <p>@alpha_calls</p>
+                        </div>
+                    </div>
+                    <div class="pool-col">
+                        <div class="pool-text">
+                            <span style="color:var(--danger-red)"><i class="fa-regular fa-sun" style="color:var(--danger-red)"></i> LUX Left</span>
+                            <strong>120 / 800</strong>
+                        </div>
+                        <div class="pool-bar-bg">
+                            <div class="pool-bar-fill danger" style="width: 15%;"></div>
+                        </div>
+                    </div>
+                    <div class="action-tags">
+                        <span class="tag"><i class="fa-solid fa-heart"></i> Like</span>
+                        <span class="tag"><i class="fa-solid fa-retweet"></i> RT</span>
+                    </div>
+                    <div class="price-col"><i class="fa-regular fa-sun"></i> 0.80 LUX</div>
+                    <div class="est-col"><i class="fa-regular fa-sun"></i> 0.64 LUX <span>(Tier 4: 0.8)</span></div>
+                    <div>
+                        <button class="btn-toggle">Sell Asset <i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+                <div class="accordion-body">
+                    <div class="body-content">
+                        <div class="preview-box">
+                            <div class="tweet-author">
+                                <img src="https://pbs.twimg.com/profile_images/1874785526903140352/-0niYltv_400x400.jpg" alt="Author">
+                                <div class="name-block">
+                                    <strong>CryptoAlpha</strong>
+                                    <span>@alpha_calls</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                🚨 MEGA THREAD: We are completely revamping our Tokenomics for Q3!<br><br>
+                                Here is a deep dive into how the new burning mechanism will reduce supply by 30%... 👇🧵
+                            </div>
+                            <div class="tweet-stats">
+                                <span><i class="fa-solid fa-heart"></i> 1,204</span>
+                                <span><i class="fa-solid fa-retweet"></i> 342</span>
+                            </div>
+                        </div>
+                        <div class="action-steps">
+                            <div>
+                                <span class="step-text">Step 1: Execute on Platform</span>
+                                <a href="#" class="btn-x-link" onclick="markExecuted(event, 'verifyBtn2')"><i class="fa-brands fa-x-twitter"></i> Open in X to Like & RT</a>
+                            </div>
+                            <div>
+                                <span class="step-text">Step 2: Claim Reward</span>
+                                <button class="btn-verify" id="verifyBtn2" onclick="verifyTask(event, this, 'taskRow2', 0.64)">
+                                    <i class="fa-solid fa-shield-halved"></i> Verify & Claim LUX
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-wrapper" id="taskRow3">
+                <div class="task-row-visible" onclick="toggleAccordion('taskRow3')">
+                    <div class="project-col">
+                        <div class="avatar-container project-avatar">
+                            <img src="https://pbs.twimg.com/profile_images/1978464030806233088/IFvq59mU_400x400.png" alt="Buyer 3">
+                        </div>
+                        <div class="project-info">
+                            <h3>DeFi Protocol X</h3>
+                            <p>@defiproto</p>
+                        </div>
+                    </div>
+                    <div class="pool-col">
+                        <div class="pool-text">
+                            <span><i class="fa-regular fa-sun" style="color:var(--lux-color)"></i> LUX Left</span>
+                            <strong>300 / 500</strong>
+                        </div>
+                        <div class="pool-bar-bg">
+                            <div class="pool-bar-fill" style="width: 60%;"></div>
+                        </div>
+                    </div>
+                    <div class="action-tags">
+                        <span class="tag"><i class="fa-regular fa-comment"></i> Comment</span>
+                    </div>
+                    <div class="price-col"><i class="fa-regular fa-sun"></i> 0.50 LUX</div>
+                    <div class="est-col"><i class="fa-regular fa-sun"></i> 0.40 LUX <span>(Tier 4: 0.8)</span></div>
+                    <div>
+                        <button class="btn-toggle">Sell Asset <i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                </div>
+
+                <div class="accordion-body">
+                    <div class="body-content">
+                        <div class="preview-box">
+                            <div class="tweet-author">
+                                <img src="https://pbs.twimg.com/profile_images/1978464030806233088/IFvq59mU_400x400.png" alt="Author">
+                                <div class="name-block">
+                                    <strong>DeFi Protocol X</strong>
+                                    <span>@defiproto</span>
+                                </div>
+                            </div>
+                            <div class="tweet-text">
+                                Our V3 Mainnet is officially LIVE! 🟢<br><br>
+                                Experience 10x faster transactions and zero gas fees on your first swap. Drop your thoughts below! 👇
+                            </div>
+                            <div class="tweet-stats">
+                                <span><i class="fa-regular fa-comment"></i> 89</span>
+                            </div>
+                        </div>
+                        <div class="action-steps">
+                            <div>
+                                <span class="step-text">Step 1: Execute on Platform</span>
+                                <a href="#" class="btn-x-link" onclick="markExecuted(event, 'verifyBtn3')"><i class="fa-brands fa-x-twitter"></i> Open in X to Comment</a>
+                            </div>
+                            <div>
+                                <span class="step-text">Step 2: Claim Reward</span>
+                                <button class="btn-verify" id="verifyBtn3" onclick="verifyTask(event, this, 'taskRow3', 0.40)">
+                                    <i class="fa-solid fa-shield-halved"></i> Verify & Claim LUX
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="logo" style="color: white;"><i class="fa-solid fa-asterisk"></i> Light House 3.0</div>
+        <div class="footer-socials">
+            <i class="fa-brands fa-x-twitter"></i>
+            <i class="fa-brands fa-telegram"></i>
+        </div>
+    </footer>
+
+    <script>
+        // 收起/展开列表
+        function toggleAccordion(rowId) {
+            document.querySelectorAll('.accordion-wrapper').forEach(wrapper => {
+                if(wrapper.id !== rowId) wrapper.classList.remove('active');
+            });
+            const row = document.getElementById(rowId);
+            row.classList.toggle('active');
+        }
+
+        // 记录推特跳转 (激活 Step 2)
+        function markExecuted(event, verifyBtnId) {
+            event.stopPropagation(); 
+            const verifyBtn = document.getElementById(verifyBtnId);
+            verifyBtn.classList.add('active-step');
+        }
+
+        // ★ 核心缝合：验证状态切换 + LUX 金币升腾 + 科技荧光涟漪
+        function verifyTask(event, btn, rowId, amount) {
+            event.stopPropagation(); 
+            if(!btn.classList.contains('active-step') || btn.classList.contains('success')) return;
+
+            // --- 阶段一：进入 Loading 状态 ---
+            btn.innerHTML = '';
+            btn.classList.remove('active-step');
+            btn.classList.add('loading');
+
+            // 模拟 1.5 秒接口校验
+            setTimeout(() => {
+                
+                // --- 阶段二：校验成功，按钮状态变身 ---
+                btn.classList.remove('loading');
+                btn.classList.add('success');
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> +${amount.toFixed(2)} LUX Claimed`;
+                
+                // --- 动效 1：科技荧光涟漪 (Ripple) ---
+                const ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 800); // 动效播完清理DOM
+
+                // --- 动效 2：LUX 金币飘升 (Coin Float) ---
+                // 获取按钮在页面中的精确绝对位置
+                const rect = btn.getBoundingClientRect();
+                const scrollX = window.scrollX || document.documentElement.scrollLeft;
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+                // 连续生成 5 个金币
+                for(let i=0; i<5; i++) {
+                    setTimeout(() => {
+                        const coin = document.createElement('i');
+                        coin.classList.add('fa-regular', 'fa-sun', 'lux-coin');
+                        // 随机散布在按钮宽度范围内，定位到 body 防止被 overflow 遮挡
+                        coin.style.left = (rect.left + scrollX + (Math.random() * rect.width * 0.8)) + 'px';
+                        coin.style.top = (rect.top + scrollY) + 'px';
+                        
+                        document.body.appendChild(coin);
+                        
+                        setTimeout(() => coin.remove(), 1000);
+                    }, i * 150); // 错开飘起的时间
+                }
+                
+                // --- 阶段三：3秒后自动折叠完成任务，流程闭环 ---
+                setTimeout(() => {
+                    document.getElementById(rowId).classList.remove('active');
+                }, 3000);
+
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
