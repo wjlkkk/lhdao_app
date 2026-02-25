@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light House 3.0 - Brand Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-base: #0a0a0a; --bg-panel: #161616; --bg-panel-hover: #1f1f1f;
+            --text-primary: #ffffff; --text-secondary: #8b8b8b;
+            --accent-green: #2ecc71; --accent-green-hover: #27ae60;
+            --border-color: #2a2a2a; --lux-color: #f39c12; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; overflow-y: scroll; }
+
+        /* ================= Header ================= */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--border-color); }
+        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--accent-green); }
+        .nav-group-container { display: flex; gap: 30px; align-items: center; }
+        .nav-group { display: flex; gap: 10px; align-items: center; padding: 4px; background: rgba(255,255,255,0.03); border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); }
+        .nav-group-title { font-size: 12px; color: #e0e0e0; text-transform: uppercase; letter-spacing: 1px; margin: 0 10px; font-weight: 600; }
+        .nav-pill { padding: 8px 16px; border-radius: 20px; color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+        .nav-pill:hover, .nav-pill.active { color: var(--text-primary); background: #fff; color: #000; font-weight: 500;}
+        .avatar-container { border-radius: 50%; width: 32px; height: 32px; overflow: hidden; }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ================= Dashboard Layout ================= */
+        main { flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; padding: 40px 20px; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 28px; display: flex; align-items: center; gap: 10px; }
+        
+        .btn-primary { background: var(--accent-green); color: #000; border: none; padding: 12px 24px; border-radius: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2); }
+        .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); padding: 12px 24px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-outline:hover { border-color: var(--text-secondary); }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; }
+        .stat-title { color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .stat-value { font-size: 28px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        
+        /* Order List */
+        .order-board { background: var(--bg-panel); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
+        .list-header, .task-row { display: grid; grid-template-columns: 2.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr; padding: 20px 24px; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .list-header { color: var(--text-secondary); font-size: 13px; background-color: rgba(0,0,0,0.2); }
+        .task-row:hover { background-color: var(--bg-panel-hover); }
+        
+        .order-name { font-weight: 500; font-size: 14px; color: #fff; margin-bottom: 4px; }
+        .order-date { font-size: 12px; color: var(--text-secondary); }
+        .tag-action { background: #2a2a2a; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; }
+        .pool-bar-bg { width: 100%; height: 6px; background: #2a2a2a; border-radius: 4px; margin-top: 6px; overflow: hidden; }
+        .pool-bar-fill { height: 100%; background: var(--accent-green); }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-align: center; display: inline-block; }
+        .status-active { background: rgba(46, 204, 113, 0.1); color: var(--accent-green); border: 1px solid rgba(46, 204, 113, 0.2); }
+        .status-ended { background: #2a2a2a; color: var(--text-secondary); border: 1px solid var(--border-color); }
+
+        /* ================= Create Order Modal ================= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 24px; width: 100%; max-width: 650px; box-shadow: 0 24px 48px rgba(0,0,0,0.5); transform: translateY(20px); transition: all 0.3s; display: flex; flex-direction: column; max-height: 90vh; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        
+        .modal-header { padding: 24px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { font-size: 20px; margin: 0; }
+        .modal-close { cursor: pointer; color: var(--text-secondary); font-size: 20px; transition: color 0.2s; }
+        .modal-close:hover { color: #fff; }
+        
+        .modal-body { padding: 30px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 20px 30px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 15px; background: rgba(0,0,0,0.2); border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-input { width: 100%; background: #0a0a0a; border: 1px solid var(--border-color); color: white; padding: 14px 16px; border-radius: 12px; font-size: 14px; outline: none; transition: border 0.2s; }
+        .form-input:focus { border-color: var(--accent-green); }
+
+        /* Tier Selector */
+        .tier-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+        .tier-btn { background: #0a0a0a; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 10px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .tier-btn.selected { background: rgba(46, 204, 113, 0.1); border-color: var(--accent-green); color: var(--accent-green); }
+        .tier-btn .tier-name { font-weight: bold; }
+        .tier-btn .tier-price { font-size: 11px; opacity: 0.8; }
+
+        /* Dynamic Estimator Box */
+        .estimator-box { background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%); border: 1px solid #333; border-radius: 16px; padding: 20px; margin-top: 10px; }
+        .estimator-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .estimator-title { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+        .estimator-result { font-size: 24px; font-weight: bold; color: var(--accent-green); }
+        .estimator-detail { font-size: 12px; color: #888; background: #000; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><i class="fa-solid fa-asterisk"></i> Light House 3.0</div>
+        <div class="nav-group-container">
+            <div class="nav-group">
+                <span class="nav-group-title">Account Lab</span>
+                <a href="#" class="nav-pill"><i class="fa-solid fa-pen-nib"></i> AI Pen</a>
+                <a href="#" class="nav-pill"><i class="fa-regular fa-newspaper"></i> Headlines</a>
+            </div>
+            <div class="nav-group">
+                <span class="nav-group-title">Traffic Exchange</span>
+                <a href="#" class="nav-pill"><i class="fa-solid fa-store"></i> Trading Center</a>
+                <a href="#" class="nav-pill active"><i class="fa-solid fa-briefcase"></i> Brand Orders</a>
+            </div>
+        </div>
+        <div class="avatar-container"><img src="https://pbs.twimg.com/profile_images/1932237760435478528/7Qtx48xK_400x400.jpg" alt="User"></div>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1><i class="fa-solid fa-briefcase"></i> Brand Orders</h1>
+            <button class="btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> Create Campaign</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total LUX Spent <i class="fa-solid fa-wallet"></i></div>
+                <div class="stat-value" style="color: var(--lux-color);"><i class="fa-regular fa-sun"></i> 12,500.0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Active Campaigns <i class="fa-solid fa-chart-pie"></i></div>
+                <div class="stat-value">2</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Engagements Acquired <i class="fa-solid fa-bolt"></i></div>
+                <div class="stat-value">45.2K</div>
+            </div>
+        </div>
+
+        <div class="order-board">
+            <div class="list-header">
+                <div>Campaign Info</div>
+                <div>Action Type</div>
+                <div>Target Pool</div>
+                <div>Budget Progress</div>
+                <div>Status</div>
+                <div style="text-align: right;">Manage</div>
+            </div>
+
+            <div class="task-row">
+                <div>
+                    <div class="order-name">Q3 Tokenomics Announcement</div>
+                    <div class="order-date">Feb 23, 2026 • ID: #9821</div>
+                </div>
+                <div>
+                    <span class="tag-action"><i class="fa-solid fa-heart"></i> Like</span>
+                    <span class="tag-action"><i class="fa-solid fa-retweet"></i> RT</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-primary);">L3, L4, L5</div>
+                <div>
+                    <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span><i class="fa-regular fa-sun" style="color:var(--lux-color)"></i> 450 Spent</span>
+                        <span style="color: var(--text-secondary);">1000 Total</span>
+                    </div>
+                    <div class="pool-bar-bg"><div class="pool-bar-fill" style="width: 45%;"></div></div>
+                </div>
+                <div><span class="status-badge status-active">● Active</span></div>
+                <div style="text-align: right;"><i class="fa-solid fa-ellipsis" style="color: var(--text-secondary); cursor: pointer;"></i></div>
+            </div>
+
+            <div class="task-row">
+                <div>
+                    <div class="order-name">V2 Mainnet Launch</div>
+                    <div class="order-date">Jan 15, 2026 • ID: #8102</div>
+                </div>
+                <div>
+                    <span class="tag-action"><i class="fa-solid fa-user-plus"></i> Follow</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-secondary);">All Tiers (L1-L5)</div>
+                <div>
+                    <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: var(--text-secondary);"><i class="fa-regular fa-sun"></i> 500 Spent</span>
+                        <span style="color: var(--text-secondary);">500 Total</span>
+                    </div>
+                    <div class="pool-bar-bg"><div class="pool-bar-fill" style="width: 100%; background: var(--text-secondary);"></div></div>
+                </div>
+                <div><span class="status-badge status-ended">Ended</span></div>
+                <div style="text-align: right;"><i class="fa-solid fa-ellipsis" style="color: var(--text-secondary); cursor: pointer;"></i></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-green);"></i> Create New Campaign</h2>
+                <i class="fa-solid fa-xmark modal-close" onclick="closeModal()"></i>
+            </div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Action Required</label>
+                        <select class="form-input" id="actionType" onchange="calculateEstimate()">
+                            <option value="1.0">Follow (Max 1.0 LUX)</option>
+                            <option value="0.5">Like & RT (Max 0.5 LUX)</option>
+                            <option value="0.3">Like Only (Max 0.3 LUX)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">Target X (Twitter) URL</label>
+                        <input type="text" class="form-input" placeholder="https://x.com/.../status/...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Total Budget (LUX)</label>
+                    <div style="position: relative;">
+                        <i class="fa-regular fa-sun" style="position: absolute; left: 16px; top: 16px; color: var(--lux-color);"></i>
+                        <input type="number" class="form-input" id="budgetInput" style="padding-left: 45px; font-size: 16px; font-weight: bold;" value="100" oninput="calculateEstimate()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Target User Tiers (Click to toggle)</label>
+                    <div class="tier-selector">
+                        <div class="tier-btn selected" data-weight="0.1" onclick="toggleTier(this)">
+                            <span class="tier-name">L1 Novice</span><span class="tier-price">10% Cost</span>
+                        </div>
+                        <div class="tier-btn selected" data-weight="0.3" onclick="toggleTier(this)">
+                            <span class="tier-name">L2 Active</span><span class="tier-price">30% Cost</span>
+                        </div>
+                        <div class="tier-btn selected" data-weight="0.5" onclick="toggleTier(this)">
+                            <span class="tier-name">L3 Elite</span><span class="tier-price">50% Cost</span>
+                        </div>
+                        <div class="tier-btn selected" data-weight="0.8" onclick="toggleTier(this)">
+                            <span class="tier-name">L4 Expert</span><span class="tier-price">80% Cost</span>
+                        </div>
+                        <div class="tier-btn selected" data-weight="1.0" onclick="toggleTier(this)">
+                            <span class="tier-name">L5 Leader</span><span class="tier-price">100% Cost</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="estimator-box">
+                    <div class="estimator-header">
+                        <div class="estimator-title"><i class="fa-solid fa-chart-pie"></i> Estimated Acquisitions</div>
+                        <div class="estimator-result" id="estRange">100 ~ 1,000</div>
+                    </div>
+                    <div class="estimator-detail">
+                        <span><i class="fa-solid fa-arrow-down-short-wide"></i> Min Expected: <strong style="color:#fff;" id="estMin">100</strong> (If all L5 users claim)</span>
+                        <span><i class="fa-solid fa-arrow-up-short-wide"></i> Max Potential: <strong style="color:#fff;" id="estMax">1,000</strong> (If all L1 users claim)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="alert('Order Published!'); closeModal();"><i class="fa-regular fa-paper-plane"></i> Pay & Launch</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Control
+        const modal = document.getElementById('orderModal');
+        function openModal() { modal.classList.add('active'); calculateEstimate(); }
+        function closeModal() { modal.classList.remove('active'); }
+
+        // Tier Toggle Logic
+        function toggleTier(element) {
+            element.classList.toggle('selected');
+            
+            // Validation: Prevent deselecting all. Force at least one selection.
+            const selectedTiers = document.querySelectorAll('.tier-btn.selected');
+            if (selectedTiers.length === 0) {
+                element.classList.add('selected'); // Re-select
+                alert("You must select at least one target tier.");
+                return;
+            }
+            calculateEstimate();
+        }
+
+        // ================= Core Pricing & Estimation Engine =================
+        function calculateEstimate() {
+            const budget = parseFloat(document.getElementById('budgetInput').value) || 0;
+            const basePrice = parseFloat(document.getElementById('actionType').value); // Max market cap for the action
+            
+            // Get all selected tier weights
+            const selectedTiers = document.querySelectorAll('.tier-btn.selected');
+            let weights = [];
+            selectedTiers.forEach(tier => {
+                weights.push(parseFloat(tier.getAttribute('data-weight')));
+            });
+
+            // Find max and min cost based on selected weights
+            const maxWeight = Math.max(...weights);
+            const minWeight = Math.min(...weights);
+
+            const maxCostPerAction = basePrice * maxWeight;
+            const minCostPerAction = basePrice * minWeight;
+
+            // Calculate Volume Range (Avoid division by zero)
+            let minVolume = 0;
+            let maxVolume = 0;
+
+            if (maxCostPerAction > 0) minVolume = Math.floor(budget / maxCostPerAction);
+            if (minCostPerAction > 0) maxVolume = Math.floor(budget / minCostPerAction);
+
+            // Update UI
+            document.getElementById('estRange').innerText = `${minVolume.toLocaleString()} ~ ${maxVolume.toLocaleString()}`;
+            document.getElementById('estMin').innerText = minVolume.toLocaleString();
+            document.getElementById('estMax').innerText = maxVolume.toLocaleString();
+            
+            // Dynamic text update based on selected tiers
+            const detailSpanMin = document.getElementById('estMin').parentNode;
+            const detailSpanMax = document.getElementById('estMax').parentNode;
+            
+            // Find names of min/max selected tiers for UI explanation
+            let minTierName = "", maxTierName = "";
+            selectedTiers.forEach(tier => {
+                const w = parseFloat(tier.getAttribute('data-weight'));
+                if(w === maxWeight) maxTierName = tier.querySelector('.tier-name').innerText;
+                if(w === minWeight) minTierName = tier.querySelector('.tier-name').innerText;
+            });
+
+            detailSpanMin.innerHTML = `<i class="fa-solid fa-arrow-down-short-wide"></i> Min Expected: <strong style="color:#fff;">${minVolume.toLocaleString()}</strong> (If all ${maxTierName} claim)`;
+            detailSpanMax.innerHTML = `<i class="fa-solid fa-arrow-up-short-wide"></i> Max Potential: <strong style="color:#fff;">${maxVolume.toLocaleString()}</strong> (If all ${minTierName} claim)`;
+        }
+
+        // Initialize calculation on load (in case modal opens directly)
+        calculateEstimate();
+    </script>
+</body>
+</html>
